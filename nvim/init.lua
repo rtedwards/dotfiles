@@ -306,7 +306,12 @@ require('lazy').setup({
     },
     build = ':TSUpdate',
   },
-
+  {
+    -- Rustaceanvim
+    'mrcjkb/rustaceanvim',
+    version = '^4', -- Recommended
+    lazy = false,   -- This plugin is already lazy
+  },
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
@@ -626,7 +631,7 @@ local servers = {
   clangd = {},
   -- gopls = {},
   -- pyright = {},
-  rust_analyzer = {},
+  -- rust_analyzer = {}, -- don't use with rustaceanvim
   -- tsserver = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
 
@@ -648,6 +653,14 @@ local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 -- Ensure the servers above are installed
+-- local lspconfig = require('lspconfig')
+-- lspconfig.rust_analyzer.setup {
+--   -- Server-specific settings. See `:help lspconfig-setup`
+--   settings = {
+--     ['rust-analyzer'] = {},
+--   },
+-- }
+
 local mason_lspconfig = require 'mason-lspconfig'
 
 mason_lspconfig.setup {
