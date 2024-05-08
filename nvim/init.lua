@@ -622,17 +622,45 @@ require('mason-lspconfig').setup()
 -- Enable the following language servers
 --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
 --
+--  Install LSPs via `:LspInstall <server>`
+--  `:Mason` - open GUI window to interactivly install / update / uninstall.
+--  https://github.com/williamboman/mason-lspconfig.nvim?tab=readme-ov-file#commands
+--
 --  Add any additional override configuration in the following tables. They will be passed to
 --  the `settings` field of the server config. You must look up that documentation yourself.
 --
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
 local servers = {
+  -- C / Cpp
   clangd = {},
-  -- gopls = {},
-  -- pyright = {},
-  -- rust_analyzer = {}, -- don't use with rustaceanvim
+  -- cpplint = {},
+
+  -- Python
+  pyright = {},
+  -- ruff = {},
+  ruff_lsp = {},
+  -- mypy = {},
+
+  rust_analyzer = {}, -- Rust (don't use with rustaceanvim)
+  julials = {},       -- Julia
+  zls = {},           -- Zig
+  sqlls = {},         -- SQL
+  bashls = {},        -- Bash
+
+  -- Misc
+  -- checkmake = {},                       -- Make
+  -- json_lsp = {},                        -- JSON
+  -- markdown_lint = {},                   -- Markdown
+  -- yamllint = {},                        -- YAML
+  yamlls = {},                          -- YAML
+  taplo = {},                           -- TOML
+  dockerls = {},                        -- docker
+  docker_compose_language_service = {}, -- Docker Compose
+
+  -- Other
   -- tsserver = {},
+  -- gopls = {},
   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
 
   lua_ls = {
