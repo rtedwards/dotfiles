@@ -166,8 +166,9 @@ Each PR, especially those which increase the line count, should have a descripti
 
     ```
 
+    what I'm actually using here (fish)
     ```
-    alias --save nvim='NVIM_APPNAME="nvim-kickstart" neovide'
+    alias --save nvim='NVIM_APPNAME="nvim" neovide'
 
     ```
     
