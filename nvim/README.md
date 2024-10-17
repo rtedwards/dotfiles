@@ -162,7 +162,7 @@ Each PR, especially those which increase the line count, should have a descripti
 * Can I keep my existing configuration in parallel to kickstart?
   * Yes! You can use [NVIM_APPNAME](https://neovim.io/doc/user/starting.html#%24NVIM_APPNAME)`=nvim-NAME` to maintain multiple configurations. For example you can install the kickstart configuration in `~/.config/nvim-kickstart` and create an alias:
     ```
-    alias nvim-kickstart='NVIM_APPNAME="nvim-kickstart" nvim'
+    alias nvim='NVIM_APPNAME="nvim" nvim'
 
     ```
 

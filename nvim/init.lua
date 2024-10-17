@@ -475,6 +475,30 @@ vim.keymap.set('n', '<leader>sG', ':LiveGrepGitRoot<cr>', { desc = '[S]earch by 
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
 
+-- [[Configure remote-sshfs]]
+local api = require('remote-sshfs.api')
+vim.keymap.set('n', '<leader>rc', api.connect, {})
+vim.keymap.set('n', '<leader>rd', api.disconnect, {})
+vim.keymap.set('n', '<leader>re', api.edit, {})
+
+-- (optional) Override telescope find_files and live_grep to make dynamic based on if connected to host
+local builtin = require("telescope.builtin")
+local connections = require("remote-sshfs.connections")
+vim.keymap.set("n", "<leader>ff", function()
+  if connections.is_connected then
+    api.find_files()
+  else
+    builtin.find_files()
+  end
+end, {})
+vim.keymap.set("n", "<leader>fg", function()
+  if connections.is_connected then
+    api.live_grep()
+  else
+    builtin.live_grep()
+  end
+end, {})
+
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 -- Defer Treesitter setup after first render to improve startup time of 'nvim {filename}'
@@ -657,6 +681,7 @@ local servers = {
   taplo = {},                           -- TOML
   dockerls = {},                        -- docker
   docker_compose_language_service = {}, -- Docker Compose
+  typst_lsp = {},
 
   -- Other
   -- tsserver = {},
