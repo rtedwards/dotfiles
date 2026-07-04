@@ -1,0 +1,133 @@
+// ~/.config/zed/keymap.json
+[
+  {
+    "context": "Editor && vim_mode == insert",
+    "bindings": {
+      "j j": "vim::NormalBefore",
+      "j k": "vim::NormalBefore"
+    }
+  },
+  {
+    "context": "Editor && showing_completions",
+    "bindings": {
+      "enter": "editor::Newline",
+      "escape": "editor::Cancel"
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "shift-left": "pane::ActivatePreviousItem",
+      "shift-right": "pane::ActivateNextItem",
+      "cmd-w": "pane::CloseActiveItem"
+    }
+  },
+  {
+    "context": "VimControl && !menu && vim_mode != operator",
+    "bindings": {
+      "w": "vim::NextSubwordStart",
+      "b": "vim::PreviousSubwordStart",
+      "e": "vim::NextSubwordEnd",
+      "g e": "vim::PreviousSubwordEnd",
+      "{": "editor::MoveToStartOfParagraph",
+      "}": "editor::MoveToEndOfParagraph",
+      "s e": "editor::MoveToStartOfExcerpt",
+      "e e": "editor::MoveToEndOfExcerpt",
+      "n e": "editor::MoveToStartOfNextExcerpt",
+      "p e": "editor::MoveToEndOfPreviousExcerpt"
+    }
+  },
+  {
+    "context": "EmptyPane || SharedScreen || vim_operator == none && !VimWaiting && vim_mode != insert",
+    "bindings": {
+      ", f b": "tab_switcher::Toggle",
+      ", f i": "file_finder::Toggle",
+      ", f o": "projects::OpenRecent",
+      ", r l": "task::Rerun",
+      ", r e": ["task::Rerun", { "reevaluate_context": true }],
+      "ctrl-s": "projects::OpenRecent"
+    }
+  },
+  {
+    "context": "VimControl && !menu", // Editor && && !VimWaiting
+    "bindings": {
+      "g d": "editor::GoToDefinition",
+      "g D": "editor::GoToTypeDefinition",
+      "g I": "editor::GoToImplementation",
+      "g A": "editor::FindAllReferences",
+      "t a": "editor::ToggleCodeActions",
+      "ctrl-]": "pane::GoForward",
+      "ctrl-[": "pane::GoBack",
+      "space w": "workspace::Save",
+      ", g b": "git::Blame",
+      "space r n": "editor::Rename",
+      "space c a": "editor::ToggleCodeActions",
+      "space s /": "buffer_search::Deploy",
+      "space s r": "buffer_search::DeployReplace",
+      "space s R": "search::ReplaceAll",
+      "space s f": "search::FocusSearch",
+      "space s w": "editor::FindAllReferences",
+      "space s g": [
+        // requires television installed: https://github.com/alexpasmantier/television/wiki/Installation
+        // `brew install television`
+        // `cargo install --locked television`
+        "task::Spawn",
+        { "task_name": "File Finder", "reveal_target": "center" }
+      ],
+      "space s G": [
+        // requires television installed: https://github.com/alexpasmantier/television/wiki/Installation
+        // `brew install television`
+        // `cargo install --locked television`
+        "task::Spawn",
+        { "task_name": "Find in Files", "reveal_target": "center" }
+      ],
+      "space s W": [
+        "task::Spawn",
+        { "task_name": "WorkTree Root", "reveal_target": "center" }
+      ]
+    }
+  },
+  {
+    "context": "Pane || Editor",
+    "bindings": {
+      "cmd-{": "pane::ActivatePreviousItem",
+      "cmd-}": "pane::ActivateNextItem",
+      "cmd-w": "pane::CloseActiveItem"
+    }
+  },
+  {
+    "context": "ProjectPanel && not_editing",
+    "bindings": {
+      "h": "project_panel::CollapseSelectedEntry",
+      "l": "project_panel::ExpandSelectedEntry",
+      "j": "menu::SelectNext",
+      "k": "menu::SelectPrevious",
+      "o": "menu::Confirm",
+      "r": "project_panel::Rename",
+      "z c": "project_panel::CollapseSelectedEntry",
+      "z o": "project_panel::ExpandSelectedEntry",
+      "shift-o": "project_panel::RevealInFileManager",
+      "x": "project_panel::Cut",
+      "c": "project_panel::Copy",
+      "p": "project_panel::Paste",
+      "d": "project_panel::Delete",
+      "a": "project_panel::NewFile",
+      "shift-a": "project_panel::NewDirectory",
+      "shift-y": "workspace::CopyPath",
+      "y": "workspace::CopyRelativePath"
+    }
+  },
+  {
+    "context": "",
+    "bindings": {
+      "ctrl-w h": "workspace::ActivatePaneLeft",
+      "ctrl-w l": "workspace::ActivatePaneRight",
+      "ctrl-w k": "workspace::ActivatePaneUp",
+      "ctrl-w j": "workspace::ActivatePaneDown",
+      "cmd-w h": "workspace::ActivatePaneLeft",
+      "cmd-w j": "workspace::ActivatePaneDown",
+      "cmd-w k": "workspace::ActivatePaneUp",
+      "cmd-w l": "workspace::ActivatePaneRight"
+    }
+  }
+]

@@ -662,12 +662,11 @@ local servers = {
 
   -- Python
   pyright = {},
-  -- ruff = {},
-  ruff_lsp = {},
+  ruff = {}, -- modern `ruff server` (replaces the archived ruff-lsp)
   -- mypy = {},
 
   rust_analyzer = {}, -- Rust (don't use with rustaceanvim)
-  julials = {},       -- Julia
+  -- julials = {},    -- Julia (no runtime installed; re-enable if you use it)
   zls = {},           -- Zig
   sqlls = {},         -- SQL
   bashls = {},        -- Bash
@@ -681,7 +680,7 @@ local servers = {
   taplo = {},                           -- TOML
   dockerls = {},                        -- docker
   docker_compose_language_service = {}, -- Docker Compose
-  typst_lsp = {},
+  -- typst_lsp = {}, -- renamed to `tinymist`; dropped from the mason registry
 
   -- Other
   -- tsserver = {},

@@ -1,0 +1,211 @@
+#!/usr/bin/env bash
+#
+# Installs the core toolchain on a new machine. Managed by chezmoi.
+#   run_onchange_ : re-runs automatically whenever this script's rendered
+#                   content changes (e.g. you add a package below).
+#   before_       : runs before chezmoi applies dotfiles, so fish/starship
+#                   exist before their config files land.
+#
+# Bump to force a re-run on every machine: rev 9
+set -euo pipefail
+
+echo "==> Setup for machineType={{ .machineType }} os={{ .chezmoi.os }}"
+
+# User-local bins aren't on PATH yet (the shell configs add them and haven't
+# loaded during this hook), so make the guards below SEE already-installed
+# tools instead of re-downloading them on every re-run.
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+
+# ---- cross-platform installers -------------------------------------------
+install_claude() {
+  command -v claude >/dev/null 2>&1 && return 0
+  echo "==> Installing Claude Code"
+  curl -fsSL https://claude.ai/install.sh | bash \
+    || echo "!! Claude Code install failed; continuing" >&2
+}
+
+install_rust() {
+  { command -v rustup >/dev/null 2>&1 || command -v cargo >/dev/null 2>&1; } && return 0
+  echo "==> Installing Rust (rustup + cargo)"
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+    | sh -s -- -y --no-modify-path \
+    || echo "!! Rust install failed; continuing" >&2
+}
+
+# Zed from its official channel (not Homebrew): downloads the official build
+# and symlinks the CLI to ~/.local/bin/zed.
+install_zed() {
+  command -v zed >/dev/null 2>&1 && return 0
+  echo "==> Installing Zed (official channel)"
+  curl -f https://zed.dev/install.sh | sh \
+    || echo "!! Zed install failed; continuing" >&2
+}
+
+# git-absorb (you configured absorb.maxStack). brew provides it on mac; else
+# build via cargo. Best-effort — never abort the run if the build fails.
+install_git_absorb() {
+  command -v git-absorb >/dev/null 2>&1 && return 0
+  command -v cargo >/dev/null 2>&1 || return 0
+  echo "==> Installing git-absorb (cargo)"
+  cargo install git-absorb || echo "!! git-absorb install failed; skipping" >&2
+}
+
+# ty (Astral's Python type checker) via uv — used by the Zed Python config.
+install_ty() {
+  command -v ty >/dev/null 2>&1 && return 0
+  command -v uv >/dev/null 2>&1 || return 0
+  echo "==> Installing ty (uv tool)"
+  uv tool install ty || echo "!! ty install failed; continuing" >&2
+}
+
+{{ if eq .chezmoi.os "darwin" -}}
+# ------------------------------ macOS ------------------------------
+if ! command -v brew >/dev/null 2>&1; then
+  echo "==> Installing Homebrew"
+  NONINTERACTIVE=1 /bin/bash -c \
+    "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+# Make brew available in this script regardless of chip (Apple Silicon / Intel)
+eval "$([ -x /opt/homebrew/bin/brew ] && /opt/homebrew/bin/brew shellenv bash || /usr/local/bin/brew shellenv bash)"
+
+# Install a cask idempotently: skip if brew already manages it; --adopt an app
+# that already exists in /Applications (e.g. installed by hand) instead of
+# erroring; and never abort the whole run if one cask still conflicts.
+install_cask() {
+  brew list --cask "$1" >/dev/null 2>&1 && return 0
+  brew install --cask --adopt "$1" \
+    || echo "!! cask '$1' left as-is (already present); continuing" >&2
+}
+
+echo "==> Installing CLI tools (brew)"
+brew install fish starship 1password-cli just neovim ripgrep \
+  node pnpm gh ruff uv git-absorb \
+  || echo "!! one or more brew formulae failed; continuing" >&2
+
+{{ if eq .machineType "workstation" -}}
+echo "==> Installing GUI apps + font (workstation only)"
+install_cask 1password
+install_cask font-fira-code-nerd-font
+{{ if eq .chezmoi.arch "arm64" -}}
+# Containers on Apple Silicon: Podman (rootless, no Docker Desktop).
+command -v podman >/dev/null 2>&1 || brew install podman || echo "!! podman skipped" >&2
+brew install podman-compose || echo "!! podman-compose skipped" >&2
+install_cask podman-desktop
+{{ else -}}
+# Containers on Intel Macs: Podman upstream dropped Intel support, so use colima
+# (free, no Docker Desktop) with the docker CLI. Boot it with `colima start`.
+brew install colima docker docker-compose || echo "!! colima/docker skipped" >&2
+{{ end -}}
+install_zed
+{{ end -}}
+
+{{ else if eq .chezmoi.os "linux" -}}
+# --------------------------- Linux (apt) ---------------------------
+if command -v apt-get >/dev/null 2>&1; then
+  # use sudo only when not already root — root containers/minimal images lack it
+  SUDO=""; [ "$(id -u)" -ne 0 ] && SUDO="sudo"
+  $SUDO apt-get update -y
+  # base deps: git + build toolchain (for cargo-built tools) + ripgrep
+  $SUDO apt-get install -y curl gpg git build-essential pkg-config libssl-dev fish ripgrep
+
+  # Neovim — apt ships too old for the kickstart config, so use the official
+  # prebuilt tarball (current stable) into ~/.local (=> ~/.local/bin/nvim).
+  if ! command -v nvim >/dev/null 2>&1; then
+    echo "==> Installing Neovim (official tarball)"
+    case "$(uname -m)" in aarch64|arm64) nvim_arch=arm64 ;; *) nvim_arch=x86_64 ;; esac
+    curl -fsSL -o /tmp/nvim.tar.gz \
+      "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${nvim_arch}.tar.gz"
+    mkdir -p "$HOME/.local"
+    tar -C "$HOME/.local" --strip-components=1 -xzf /tmp/nvim.tar.gz
+  fi
+
+  # starship
+  command -v starship >/dev/null 2>&1 \
+    || { echo "==> Installing starship"; curl -sS https://starship.rs/install.sh | sh -s -- --yes; }
+
+  # just
+  command -v just >/dev/null 2>&1 \
+    || { echo "==> Installing just"; curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to "$HOME/.local/bin"; }
+
+  # Node.js (current LTS via NodeSource) + npm, then pnpm via corepack
+  if ! command -v node >/dev/null 2>&1; then
+    echo "==> Installing Node.js (NodeSource LTS)"
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | $SUDO bash -
+    $SUDO apt-get install -y nodejs
+  fi
+  if ! command -v pnpm >/dev/null 2>&1; then
+    if command -v corepack >/dev/null 2>&1; then
+      echo "==> Enabling pnpm (corepack)"; $SUDO corepack enable pnpm || true
+    elif command -v npm >/dev/null 2>&1; then
+      echo "==> Installing pnpm (npm)"; $SUDO npm install -g pnpm || true
+    fi
+  fi
+
+  # ruff (Python linter/formatter used by Zed + nvim)
+  command -v ruff >/dev/null 2>&1 \
+    || { echo "==> Installing ruff"; curl -LsSf https://astral.sh/ruff/install.sh | sh; }
+
+  # uv (Python package/tool manager; installs ty below)
+  command -v uv >/dev/null 2>&1 \
+    || { echo "==> Installing uv"; curl -LsSf https://astral.sh/uv/install.sh | sh; }
+
+  # GitHub CLI (official apt repo)
+  if ! command -v gh >/dev/null 2>&1; then
+    echo "==> Installing GitHub CLI"
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+      | $SUDO gpg --yes --dearmor --output /usr/share/keyrings/githubcli-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+      | $SUDO tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+    $SUDO apt-get update -y && $SUDO apt-get install -y gh
+  fi
+
+  # Podman (daemonless, rootless containers) + compose
+  if ! command -v podman >/dev/null 2>&1; then
+    echo "==> Installing Podman"
+    $SUDO apt-get install -y podman
+  fi
+  command -v podman-compose >/dev/null 2>&1 || $SUDO apt-get install -y podman-compose || true
+
+  # 1Password CLI
+  if ! command -v op >/dev/null 2>&1; then
+    echo "==> Installing 1Password CLI"
+    curl -sS https://downloads.1password.com/linux/keys/1password.asc \
+      | $SUDO gpg --yes --dearmor --output /usr/share/keyrings/1password-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/$(dpkg --print-architecture) stable main" \
+      | $SUDO tee /etc/apt/sources.list.d/1password.list
+    $SUDO mkdir -p /etc/debsig/policies/AC2D62742012EA22/
+    curl -sS https://downloads.1password.com/linux/debian/debsig/1password.pol \
+      | $SUDO tee /etc/debsig/policies/AC2D62742012EA22/1password.pol
+    $SUDO mkdir -p /usr/share/debsig/keyrings/AC2D62742012EA22
+    curl -sS https://downloads.1password.com/linux/keys/1password.asc \
+      | $SUDO gpg --yes --dearmor --output /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
+    $SUDO apt-get update -y && $SUDO apt-get install -y 1password-cli
+  fi
+
+{{ if eq .machineType "workstation" -}}
+  # ---- workstation-only: Zed + FiraCode font ----
+  install_zed   # official channel, not homebrew
+
+  # `|| true` guards fc-list against SIGPIPE (grep -q exits early) under pipefail
+  if ! { fc-list 2>/dev/null || true; } | grep -qi "FiraCode Nerd Font"; then
+    echo "==> Installing FiraCode Nerd Font"
+    $SUDO apt-get install -y unzip fontconfig
+    tmpzip="$(mktemp -d)/FiraCode.zip"
+    curl -fLo "$tmpzip" https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip
+    mkdir -p "$HOME/.local/share/fonts/FiraCode"
+    unzip -o "$tmpzip" -d "$HOME/.local/share/fonts/FiraCode" >/dev/null
+    fc-cache -f >/dev/null
+  fi
+{{ end -}}
+else
+  echo "!! Non-apt Linux detected. Install the toolchain manually." >&2
+fi
+
+{{ end -}}
+# ---- cross-platform (all machines) ----
+install_rust
+install_git_absorb   # needs cargo (installed just above, or already present)
+install_claude
+install_ty           # needs uv (installed just above, or via brew on mac)
+
+echo "==> Done. Start fish with: exec fish   (set as default: see README)"

@@ -1,0 +1,19 @@
+# ~/.zshrc — managed by chezmoi
+
+{{ if eq .chezmoi.os "darwin" -}}
+# Homebrew (Apple Silicon or Intel)
+if [ -x /opt/homebrew/bin/brew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv zsh)"
+elif [ -x /usr/local/bin/brew ]; then
+    eval "$(/usr/local/bin/brew shellenv zsh)"
+fi
+{{ else if eq .chezmoi.os "linux" -}}
+# Homebrew (Linux, if installed)
+[ -x /home/linuxbrew/.linuxbrew/bin/brew ] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
+{{ end -}}
+
+# PATH: ~/.local/bin (claude, chezmoi) and ~/.cargo/bin (rust)
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+
+# Starship prompt
+command -v starship >/dev/null && eval "$(starship init zsh)"

@@ -1,0 +1,11 @@
+[user]
+	email = rtedwards.eng@gmail.com
+	name = Robert Edwards
+[rerere]
+	enabled = true
+[core]
+	editor = {{ if eq .machineType "workstation" }}zed --wait{{ else }}nvim{{ end }}
+[alias]
+	rebase-master = !git fetch origin main && git rebase origin/main
+[absorb]
+	maxStack = 20

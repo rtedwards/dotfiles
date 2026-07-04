@@ -1,0 +1,6 @@
+{{/* Generated into ~/.config/chezmoi/chezmoi.toml on `chezmoi init`. */}}
+{{/* Prompts once per machine so configs/installs can differ per box. */}}
+{{- $machineType := promptStringOnce . "machineType" "Machine type (workstation/server)" "workstation" -}}
+
+[data]
+    machineType = {{ $machineType | quote }}

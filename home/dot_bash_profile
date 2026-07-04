@@ -1,0 +1,4 @@
+# ~/.bash_profile — managed by chezmoi
+# Login shells (e.g. ssh into a server) read this, not .bashrc — so source
+# .bashrc here to get the same PATH / prompt in both.
+[ -f ~/.bashrc ] && . ~/.bashrc

@@ -1,0 +1,14 @@
+# ~/.ssh/config — managed by chezmoi
+{{ if eq .machineType "workstation" -}}
+# Authenticate all SSH (incl. git@github.com) through the 1Password SSH agent.
+# One key, stored in 1Password; nothing private ever lands on disk or in the repo.
+{{ if eq .chezmoi.os "darwin" -}}
+Host *
+    IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+{{ else if eq .chezmoi.os "linux" -}}
+Host *
+    IdentityAgent ~/.1password/agent.sock
+{{ end -}}
+{{ else -}}
+# server: no 1Password GUI here — use `gh auth login` (HTTPS) or a deploy key.
+{{ end -}}

@@ -1,2 +1,2 @@
-# lazyvim
-lazy-lock.json
+# lazy-lock.json is intentionally tracked so every machine gets the same
+# nvim plugin versions (reproducible installs). Nothing is ignored here.

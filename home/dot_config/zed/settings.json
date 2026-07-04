@@ -1,0 +1,145 @@
+// ~/.config/zed/settings.json
+{
+  "project_panel": {
+    "dock": "left"
+  },
+  "outline_panel": {
+    "dock": "left"
+  },
+  "collaboration_panel": {
+    "dock": "left"
+  },
+  "diff_view_style": "unified",
+  "agent_servers": {
+    "claude-acp": {
+      "type": "registry"
+    }
+  },
+  "git_panel": {
+    "dock": "left",
+    "tree_view": true,
+  },
+  "colorize_brackets": true,
+  "edit_predictions": {
+    "provider": "zed",
+    "mode": "subtle",
+    "copilot": {
+      "proxy": null,
+      "proxy_no_verify": null,
+      "enterprise_uri": null,
+    },
+    "enabled_in_text_threads": false,
+  },
+  "agent": {
+    "sidebar_side": "right",
+    "dock": "right",
+    "default_model": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-5-latest",
+    },
+    "play_sound_when_agent_done": "always",
+    "use_modifier_to_send": true,
+    "default_profile": "write",
+    "model_parameters": [],
+  },
+  "icon_theme": "Bearded Icon Theme",
+  "theme": "Gruvbox Dark Hard",
+  "ui_font_size": 24,
+  "buffer_font_size": 20.0,
+  "agent_ui_font_size": 20,
+  "buffer_font_family": "FiraCode Nerd Font",
+  "vim_mode": true,
+  "inlay_hints": {
+    "enabled": true,
+    "show_type_hints": true,
+    "show_parameter_hints": true,
+    "show_other_hints": true,
+  },
+  "terminal": {
+    "toolbar": {
+      "breadcrumbs": true,
+    },
+    "detect_venv": {
+      "on": {
+        // Default directories to search for virtual environments, relative
+        // to the current working directory. We recommend overriding this
+        // in your project's settings, rather than globally.
+        "directories": [".venv", "venv"],
+        // Can also be `csh`, `fish`, and `nushell`
+        "activate_script": "fish",
+      },
+    },
+  },
+  "languages": {
+    "Python": {
+      "language_servers": ["ruff", "ty", "!pyrefly", "!pyright", "!pylsp"], //
+      "format_on_save": "on",
+      "formatter": [
+        { "code_action": "source.organizeImports.ruff" },
+        { "code_action": "source.fixAll.ruff" },
+        {
+          "language_server": {
+            "name": "ruff",
+          },
+        },
+      ],
+    },
+    "Markdown": {
+      "soft_wrap": "none",
+    },
+    "JSON": {
+      "tab_size": 4,
+    },
+  },
+  "lsp": {
+    // Specify the LSP name as a key here.
+    // As of 8/10/22, supported LSPs are:
+    // pyright
+    // gopls
+    // rust-analyzer
+    // typescript-language-server
+    // vscode-json-languageserver
+    "rust-analyzer": {
+      //These initialization options are merged into Zed's defaults
+      "initialization_options": {
+        "checkOnSave": {
+          "command": "clippy",
+        },
+        "inlayHints": {
+          "maxLength": null,
+          "lifetimeElisionHints": {
+            "useParameterNames": true,
+            "enable": "skip_trivial",
+          },
+          "closureReturnTypeHints": {
+            "enable": "always",
+          },
+        },
+      },
+    },
+    "pylsp": {
+      "settings": {
+        "plugins": {
+          "mypy": {
+            "enabled": false,
+          },
+          "pycodestyle": {
+            "enabled": false,
+          },
+        },
+      },
+    },
+    "pyright": {
+      "settings": {
+        "python": {
+          "pythonPath": "*.venv/bin/python",
+        },
+        "python.analysis": {
+          "diagnosticMode": "workspace",
+          "typeCheckingMode": "off",
+          "exclude": [".venv", "venv"],
+        },
+      },
+    },
+  },
+}
