@@ -129,5 +129,12 @@
       "cmd-w k": "workspace::ActivatePaneUp",
       "cmd-w l": "workspace::ActivatePaneRight"
     }
+  },
+  {
+    "context": "",
+    "bindings": {
+      "cmd-+": "zed::IncreaseUiFontSize",
+      "cmd-_": "zed::DecreaseUiFontSize"
+    }
   }
 ]
