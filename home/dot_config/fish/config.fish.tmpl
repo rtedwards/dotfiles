@@ -25,3 +25,9 @@ if status is-interactive
     # 1Password CLI shell plugins (uncomment after `op plugin init`)
     # test -f ~/.config/op/plugins.sh && source ~/.config/op/plugins.sh
 end
+
+# >>> wardwren: mise >>>
+if not status is-interactive
+    set -gx PATH "{{ .chezmoi.homeDir }}/.local/share/mise/shims" (string match -v -- "{{ .chezmoi.homeDir }}/.local/share/mise/shims" $PATH)
+end
+# <<< wardwren: mise <<<
